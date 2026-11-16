@@ -1,0 +1,13 @@
+{
+  "name": "m3u-player-tv-sbtv",
+  "version": "1.0.0",
+  "description": "SBTV / MovieFlix M3U Web Streaming Player (Java & Vercel Edition)",
+  "main": "api/stats.js",
+  "scripts": {
+    "build": "node scripts/prebuild.js",
+    "start": "node scripts/dev-server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

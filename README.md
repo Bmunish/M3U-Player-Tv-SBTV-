@@ -46,21 +46,29 @@
 
 ## 🚀 Quick Start
 
-### 1. Run with One Command
+### ⚡ Deploy on Vercel (One-Click)
+This project is configured with zero-config Vercel Serverless & Static hosting support:
+1. Import this repository into [Vercel](https://vercel.com/new).
+2. The prebuild script automatically indexes playlists and packages static assets (`public/`).
+3. Deploy! Your streaming player will be live at `https://<your-project>.vercel.app`.
+
+Or deploy with Vercel CLI:
+```bash
+npm install -g vercel
+vercel
+```
+
+### ☕ Local Run with Java
 ```bash
 ./run.sh
 ```
 *The script will automatically detect your Java installation, compile the project if needed, start the web server on port 8080, and open `http://localhost:8080` in your browser.*
 
-### 2. Custom Port
+### 🟢 Local Run with Node.js
 ```bash
-./run.sh 9090
-```
-
-### 3. Build Executable JAR Manually
-```bash
-./build.sh
-java -jar sbtv-player.jar --port 8080
+npm run build
+npm start
+# Opens dev server at http://localhost:3000
 ```
 
 ---

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SBTV Stream — Free Movies & Live M3U Player</title>
+  <meta name="description" content="Watch Live TV, Movies and Series freely without any login. Fast M3U streaming player powered by Java.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <!-- Local Hls.js for 100% offline support -->
+  <script src="js/hls.min.js?v=3"></script>
+</head>
+<body>
+  <!-- Header / Navigation Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <a href="#" class="brand-logo" id="logoLink">
+        <img src="assets/logo.svg" alt="SBTV Stream" class="logo-img">
+      </a>
+      <nav class="nav-links">
+        <button class="nav-link active" data-tab="home">Home</button>
+        <button class="nav-link" data-tab="channels">Live TV</button>
+        <button class="nav-link" data-tab="movies">Movies</button>
+        <button class="nav-link" data-tab="series">Series</button>
+        <button class="nav-link" data-tab="sports">Sports</button>
+        <button class="nav-link" data-tab="kids">Kids</button>
+        <button class="nav-link" data-tab="favorites">My List</button>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search channels, movies..." autocomplete="off">
+        <button id="clearSearchBtn" class="clear-btn" style="display: none;">&times;</button>
+      </div>
+
+      <div class="playlist-dropdown-wrap">
+        <select id="sourceSelect" class="source-select" title="Active Playlist Source">
+          <option value="All">All Sources</option>
+        </select>
+      </div>
+
+      <button id="addPlaylistBtn" class="btn btn-secondary btn-icon" title="Manage Playlists">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Playlists</span>
+      </button>
+
+      <button id="refreshBtn" class="btn btn-icon-only" title="Reload Streams">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"></path>
+          <path d="M1 20v-6h6"></path>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-main">
+    <!-- Hero Banner (Home only) -->
+    <section id="heroSection" class="hero-section">
+      <div class="hero-backdrop" id="heroBackdrop"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badges">
+          <span class="badge badge-gold" id="heroBadge">FEATURED</span>
+          <span class="badge badge-red" id="heroLiveBadge">LIVE HD</span>
+          <span class="hero-source" id="heroSource">SBTV Premium</span>
+        </div>
+        <h1 class="hero-title" id="heroTitle">Discover Unlimited Live TV & Movies</h1>
+        <p class="hero-category" id="heroCategory">Action · Drama · Live Sports · Free Streaming</p>
+        <p class="hero-desc" id="heroDesc">
+          Instant high-definition streaming directly in your browser. No login required, no subscription, powered by pure Java backend.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-large" id="heroPlayBtn">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Watch Now</span>
+          </button>
+          <button class="btn btn-glass btn-large" id="heroAddFavBtn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Add to Watchlist</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content Sections / Views -->
+    <div class="view-container">
+      
+      <!-- Home View (Netflix style rails) -->
+      <section id="viewHome" class="content-view active">
+        <!-- Live Channels Rail -->
+        <div class="content-rail" id="railChannels">
+          <div class="rail-header">
+            <div class="rail-title-wrap">
+              <span class="rail-accent"></span>
+              <h2 class="rail-title">Live TV Channels</h2>
+            </div>
+            <button class="rail-more-btn" data-target-tab="channels">See All &rarr;</button>
+          </div>
+          <div class="rail-scroll-wrap">
+            <button class="scroll-arrow scroll-left" onclick="scrollRail('railChannelsList', -400)">&lsaquo;</button>
+            <div class="rail-items horizontal-scroll" id="railChannelsList">
+              <!-- Dynamically populated -->
+            </div>
+            <button class="scroll-arrow scroll-right" onclick="scrollRail('railChannelsList', 400)">&rsaquo;</button>
+          </div>
+        </div>
+
+        <!-- Trending Movies Rail -->
+        <div class="content-rail" id="railMovies">
+          <div class="rail-header">
+            <div class="rail-title-wrap">
+              <span class="rail-accent"></span>
+              <h2 class="rail-title">Trending Movies</h2>
+            </div>
+            <button class="rail-more-btn" data-target-tab="movies">See All &rarr;</button>
+          </div>
+          <div class="rail-scroll-wrap">
+            <button class="scroll-arrow scroll-left" onclick="scrollRail('railMoviesList', -400)">&lsaquo;</button>
+            <div class="rail-items horizontal-scroll" id="railMoviesList">
+              <!-- Dynamically populated -->
+            </div>
+            <button class="scroll-arrow scroll-right" onclick="scrollRail('railMoviesList', 400)">&rsaquo;</button>
+          </div>
+        </div>
+
+        <!-- Popular Series Rail -->
+        <div class="content-rail" id="railSeries">
+          <div class="rail-header">
+            <div class="rail-title-wrap">
+              <span class="rail-accent"></span>
+              <h2 class="rail-title">Popular TV Series</h2>
+            </div>
+            <button class="rail-more-btn" data-target-tab="series">See All &rarr;</button>
+          </div>
+          <div class="rail-scroll-wrap">
+            <button class="scroll-arrow scroll-left" onclick="scrollRail('railSeriesList', -400)">&lsaquo;</button>
+            <div class="rail-items horizontal-scroll" id="railSeriesList">
+              <!-- Dynamically populated -->
+            </div>
+            <button class="scroll-arrow scroll-right" onclick="scrollRail('railSeriesList', 400)">&rsaquo;</button>
+          </div>
+        </div>
+
+        <!-- Sports Rail -->
+        <div class="content-rail" id="railSports">
+          <div class="rail-header">
+            <div class="rail-title-wrap">
+              <span class="rail-accent"></span>
+              <h2 class="rail-title">Live Sports Action</h2>
+            </div>
+            <button class="rail-more-btn" data-target-tab="sports">See All &rarr;</button>
+          </div>
+          <div class="rail-scroll-wrap">
+            <button class="scroll-arrow scroll-left" onclick="scrollRail('railSportsList', -400)">&lsaquo;</button>
+            <div class="rail-items horizontal-scroll" id="railSportsList">
+              <!-- Dynamically populated -->
+            </div>
+            <button class="scroll-arrow scroll-right" onclick="scrollRail('railSportsList', 400)">&rsaquo;</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dedicated Grid Views -->
+      <!-- Live TV Channels View -->
+      <section id="viewChannels" class="content-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Live TV Channels</h1>
+            <p class="view-subtitle" id="channelsCountText">Loading channels...</p>
+          </div>
+        </div>
+        <div class="category-pills" id="channelsPills"></div>
+        <div class="media-grid channels-grid" id="channelsGrid"></div>
+        <div class="pagination-wrap" id="channelsPagination"></div>
+      </section>
+
+      <!-- Movies View -->
+      <section id="viewMovies" class="content-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Movies & VOD</h1>
+            <p class="view-subtitle" id="moviesCountText">Loading movies...</p>
+          </div>
+        </div>
+        <div class="category-pills" id="moviesPills"></div>
+        <div class="media-grid movies-grid" id="moviesGrid"></div>
+        <div class="pagination-wrap" id="moviesPagination"></div>
+      </section>
+
+      <!-- Series View -->
+      <section id="viewSeries" class="content-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">TV Shows & Series</h1>
+            <p class="view-subtitle" id="seriesCountText">Loading series...</p>
+          </div>
+        </div>
+        <div class="category-pills" id="seriesPills"></div>
+        <div class="media-grid series-grid" id="seriesGrid"></div>
+        <div class="pagination-wrap" id="seriesPagination"></div>
+      </section>
+
+      <!-- Sports View -->
+      <section id="viewSports" class="content-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Sports Streams</h1>
+            <p class="view-subtitle" id="sportsCountText">Live matches & tournaments</p>
+          </div>
+        </div>
+        <div class="media-grid channels-grid" id="sportsGrid"></div>
+      </section>
+
+      <!-- Kids View -->
+      <section id="viewKids" class="content-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Kids & Cartoons</h1>
+            <p class="view-subtitle" id="kidsCountText">Family & child-friendly channels</p>
+          </div>
+        </div>
+        <div class="media-grid channels-grid" id="kidsGrid"></div>
+      </section>
+
+      <!-- Favorites View -->
+      <section id="viewFavorites" class="content-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">My Watchlist & Favorites</h1>
+            <p class="view-subtitle" id="favCountText">0 saved items</p>
+          </div>
+          <button class="btn btn-secondary btn-small" id="clearFavsBtn">Clear All</button>
+        </div>
+        <div class="media-grid" id="favoritesGrid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Video Player Modal / Overlay -->
+  <div id="playerOverlay" class="player-overlay" style="display: none;">
+    <div class="player-modal">
+      <!-- Player Header -->
+      <div class="player-header">
+        <div class="player-info">
+          <span class="player-badge" id="playerBadge">LIVE</span>
+          <h2 class="player-title" id="playerTitle">Channel Name</h2>
+          <span class="player-meta" id="playerMeta">Sports · HD</span>
+        </div>
+        <div class="player-header-actions">
+          <!-- Proxy / Direct toggle -->
+          <div class="proxy-toggle-wrap" title="Toggle between direct stream and Java backend proxy (fixes CORS/blocking)">
+            <label class="switch-label">
+              <input type="checkbox" id="proxyToggle" checked>
+              <span class="toggle-switch"></span>
+              <span class="toggle-text">Java Stream Proxy</span>
+            </label>
+          </div>
+
+          <button id="playerFavBtn" class="btn btn-icon-only" title="Favorite">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </button>
+          <button id="playerZapperBtn" class="btn btn-icon-only" title="Toggle Channel Quick-Switcher">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </button>
+          <button id="closePlayerBtn" class="btn btn-icon-only close-btn" title="Close Player (Esc)">&times;</button>
+        </div>
+      </div>
+
+      <!-- Video Area + Quick Channel Sidebar -->
+      <div class="player-body">
+        <div class="video-container" id="videoContainer">
+          <video id="videoElement" playsinline controls></video>
+          
+          <!-- Loading Spinner -->
+          <div class="player-loading" id="playerLoading">
+            <div class="spinner"></div>
+            <p id="playerLoadingText">Connecting to stream...</p>
+          </div>
+
+          <!-- Error Alert Banner -->
+          <div class="player-error" id="playerError" style="display: none;">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#E50914" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <h3>Stream Playback Notice</h3>
+            <p id="playerErrorMsg">Unable to play this direct stream. Switching to Java Proxy...</p>
+            <div class="player-error-actions">
+              <button class="btn btn-primary" id="retryProxyBtn">Retry via Java Proxy</button>
+              <button class="btn btn-secondary" id="retryDirectBtn">Retry Direct</button>
+              <button class="btn btn-glass" onclick="document.getElementById('playerError').style.display='none'">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Channel Zapper / Episode Drawer -->
+        <aside class="player-sidebar" id="playerSidebar">
+          <div class="sidebar-header">
+            <h3 id="sidebarTitle">Quick Channels</h3>
+            <input type="text" id="sidebarSearch" placeholder="Filter..." class="sidebar-search">
+          </div>
+          <div class="sidebar-list" id="sidebarList">
+            <!-- Dynamically populated channels/episodes -->
+          </div>
+        </aside>
+      </div>
+
+      <!-- Player Footer / Info bar -->
+      <div class="player-footer">
+        <div class="player-footer-left">
+          <span class="url-display" id="playerUrlDisplay" title="Raw Stream URL">Stream URL</span>
+        </div>
+        <div class="player-shortcuts">
+          <span><kbd>Space</kbd> Play/Pause</span>
+          <span><kbd>F</kbd> Fullscreen</span>
+          <span><kbd>M</kbd> Mute</span>
+          <span><kbd>Esc</kbd> Exit</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Series Episodes Modal (dialog element) -->
+  <dialog id="seriesModal" class="modal-dialog">
+    <div class="modal-content series-dialog-content">
+      <div class="dialog-header">
+        <h2 id="seriesModalTitle">Series Title</h2>
+        <button class="btn btn-icon-only close-btn" onclick="document.getElementById('seriesModal').close()">&times;</button>
+      </div>
+      <div class="series-dialog-body">
+        <div class="series-cover-wrap">
+          <img id="seriesModalPoster" src="assets/no-image.png" alt="Series Poster" class="series-cover">
+          <p id="seriesModalCategory" class="series-badge">Category</p>
+        </div>
+        <div class="series-episodes-wrap">
+          <div class="season-tabs" id="seasonTabs"></div>
+          <div class="episodes-list" id="episodesList"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Playlist Manager Modal (dialog element) -->
+  <dialog id="playlistsModal" class="modal-dialog">
+    <div class="modal-content">
+      <div class="dialog-header">
+        <h2>Manage M3U Playlists</h2>
+        <button class="btn btn-icon-only close-btn" onclick="document.getElementById('playlistsModal').close()">&times;</button>
+      </div>
+      
+      <div class="dialog-tabs">
+        <button class="dialog-tab active" data-dtab="activeList">Active Playlists</button>
+        <button class="dialog-tab" data-dtab="addUrl">Add M3U URL</button>
+        <button class="dialog-tab" data-dtab="uploadFile">Upload M3U File</button>
+      </div>
+
+      <div class="dialog-body">
+        <!-- Active Playlists Tab -->
+        <div id="dtabActiveList" class="dialog-tab-pane active">
+          <div class="sources-list" id="sourcesList">
+            <p class="loading-text">Loading sources...</p>
+          </div>
+        </div>
+
+        <!-- Add M3U URL Tab -->
+        <div id="dtabAddUrl" class="dialog-tab-pane">
+          <form id="addSourceForm" class="dialog-form">
+            <div class="form-group">
+              <label for="newSourceName">Playlist Name</label>
+              <input type="text" id="newSourceName" placeholder="e.g. My Premium IPTV / Movies" required>
+            </div>
+            <div class="form-group">
+              <label for="newSourceUrl">M3U / M3U8 Playlist URL</label>
+              <input type="url" id="newSourceUrl" placeholder="https://example.com/playlist.m3u" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Add Playlist</button>
+          </form>
+        </div>
+
+        <!-- Upload M3U File Tab -->
+        <div id="dtabUploadFile" class="dialog-tab-pane">
+          <div class="upload-dropzone" id="uploadDropzone">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#C6A75E" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p><strong>Click to choose a file</strong> or drag and drop your <code>.m3u</code> or <code>.m3u8</code> playlist file here</p>
+            <input type="file" id="fileUploadInput" accept=".m3u,.m3u8,.txt" style="display: none;">
+          </div>
+          <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
+  <script src="js/player.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>
+
