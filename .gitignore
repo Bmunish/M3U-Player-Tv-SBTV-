@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Compiled classes
+bin/
+
+# Editor / Workspace
+*.code-workspace
+.vscode/
+.idea/

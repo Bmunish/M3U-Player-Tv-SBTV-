@@ -1,0 +1,10 @@
+[
+  {"id":"src_sample_vod","name":"MovieFlix On-Demand Movies & Series","url":"data/playlists/sample_movies.m3u","enabled":true,"type":"local"},
+  {"id":"src_in","name":"Indian TV","url":"https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/in.m3u","enabled":true,"type":"url"},
+  {"id":"src_movies","name":"Movies Channel","url":"https://iptv-org.github.io/iptv/categories/movies.m3u","enabled":true,"type":"url"},
+  {"id":"src_sports","name":"Live Sports","url":"https://iptv-org.github.io/iptv/categories/sports.m3u","enabled":true,"type":"url"},
+  {"id":"src_kids","name":"Kids & Animation","url":"https://iptv-org.github.io/iptv/categories/animation.m3u","enabled":true,"type":"url"},
+  {"id":"src_news","name":"World News","url":"https://iptv-org.github.io/iptv/categories/news.m3u","enabled":true,"type":"url"},
+  {"id":"src_music","name":"Music Live","url":"https://iptv-org.github.io/iptv/categories/music.m3u","enabled":true,"type":"url"},
+  {"id":"src_doc","name":"Documentary","url":"https://iptv-org.github.io/iptv/categories/documentary.m3u","enabled":true,"type":"url"}
+]
